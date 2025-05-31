@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const upload = require('../middleware/upload');
 
 const {
   createCourse,
@@ -7,6 +8,7 @@ const {
   getCourseById,
   updateCourse,
   deleteCourse,
+  getAllModules,
   addOrUpdateModule,
   deleteModule,
 } = require('../controllers/courseController');
@@ -14,18 +16,19 @@ const {
 const { protect } = require('../middleware/authMiddleware');
 const { instructorOnly } = require('../middleware/roleMiddleware');
 
-// All routes protected and instructor-only
 router.use(protect, instructorOnly);
 
-router.post('/', createCourse);
+// Course routes
+router.post('/', upload.single('courseImage'), createCourse); // Handle image
+router.put('/:id', upload.single('courseImage'), updateCourse); // Update image
 router.get('/', getInstructorCourses);
 router.get('/:id', getCourseById);
-router.put('/:id', updateCourse);
 router.delete('/:id', deleteCourse);
 
-// Modules inside a course
-router.post('/:courseId/modules', addOrUpdateModule);       // Add new module
-router.put('/:courseId/modules/:moduleId', addOrUpdateModule);  // Update module
+// Module routes
+router.get('/:courseId/modules', getAllModules);
+router.post('/:courseId/modules', upload.single('video'), addOrUpdateModule); // Handle video
+router.put('/:courseId/modules/:moduleId', upload.single('video'), addOrUpdateModule);
 router.delete('/:courseId/modules/:moduleId', deleteModule);
 
 module.exports = router;
